@@ -15,7 +15,7 @@ class UpdateProfileScreen extends StatefulWidget {
 class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   final firstnameController = TextEditingController();
   final lastnameController = TextEditingController();
-  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
 
   Future<void> updateProfile() async {
     final url = Uri.parse('${ApiConfig.baseUrl}/auth/update');
@@ -24,7 +24,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
         body: {
           'firstname': firstnameController.text,
           'lastname': lastnameController.text,
-          'email': emailController.text,
+          'phone': phoneController.text,
         });
 
     if (response.statusCode == 200) {
@@ -51,7 +51,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
           children: [
             TextField(controller: firstnameController, decoration: InputDecoration(labelText: 'Prénom')),
             TextField(controller: lastnameController, decoration: InputDecoration(labelText: 'Nom')),
-            TextField(controller: emailController, decoration: InputDecoration(labelText: 'Email')),
+            TextField(controller: phoneController, decoration: InputDecoration(labelText: 'Phone')),
             ElevatedButton(onPressed: updateProfile, child: Text('Mettre à jour')),
           ],
         ),

@@ -39,6 +39,7 @@ class MyApp extends StatelessWidget {
           routes: {
             '/register': (context) => RegisterScreen(),
             '/products': (context) => ProductListScreen(token: token),
+            '/home': (context) => HomeScreen(token: token),
             '/cart': (context) => CartScreen(token: token),
             '/profile': (context) => ProfileScreen(token: token),
             '/profile/update': (context) => UpdateProfileScreen(token: token),

@@ -4,11 +4,11 @@ import '../../config/api.dart';
 
 
 class AuthService {
-  Future<String?> login(String email, String password) async {
+  Future<String?> login(String phone, String password) async {
     final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}/login'),
+      Uri.parse('${ApiConfig.baseUrl}/auth/signin'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}),
+      body: jsonEncode({'phone': phone, 'password': password}),
     );
     if (response.statusCode == 200) {
       return jsonDecode(response.body)['token'];
@@ -18,7 +18,7 @@ class AuthService {
 
   Future<bool> register(Map<String, String> user) async {
     final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}/register'),
+      Uri.parse('${ApiConfig.baseUrl}/auth/register'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(user),
     );
@@ -27,7 +27,7 @@ class AuthService {
 
   Future<bool> updateUser(String token, Map<String, String> updatedData) async {
     final response = await http.put(
-      Uri.parse('${ApiConfig.baseUrl}/update'),
+      Uri.parse('${ApiConfig.baseUrl}/users'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token'
@@ -39,7 +39,7 @@ class AuthService {
 
   Future<bool> deleteUser(String token) async {
     final response = await http.delete(
-      Uri.parse('${ApiConfig.baseUrl}/delete'),
+      Uri.parse('${ApiConfig.baseUrl}/users'),
       headers: {'Authorization': 'Bearer $token'},
     );
     return response.statusCode == 200;

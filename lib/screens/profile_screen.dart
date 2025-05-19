@@ -35,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> deleteAccount() async {
-    final url = Uri.parse('${ApiConfig.baseUrl}/auth/delete');
+    final url = Uri.parse('${ApiConfig.baseUrl}/auth/users/');
     final response = await http.delete(url, headers: {
       'Authorization': 'Bearer ${widget.token}',
     });
@@ -65,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Text('Nom : ${user!['lastname']}'),
             Text('Prénom : ${user!['firstname']}'),
-            Text('Email : ${user!['email']}'),
+            Text('Phone : ${user!['phone']}'),
             ElevatedButton(onPressed: () => Navigator.pushNamed(context, '/profile/update'), child: Text('Modifier')),
             TextButton(onPressed: deleteAccount, child: Text('Supprimer mon compte', style: TextStyle(color: Colors.red))),
           ],

@@ -10,21 +10,22 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
   final passwordController = TextEditingController();
 
   Future<void> login() async {
-    final url = Uri.parse('${ApiConfig.baseUrl}/auth/login');
+    final url = Uri.parse('${ApiConfig.baseUrl}/auth/signin');
     try {
       final response = await http.post(url, body: {
-        'email': emailController.text,
+        'phoneNumber': phoneController.text,
         'password': passwordController.text,
       });
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        print(data);
         if (data['token'] == null) {
-          _showError('Erreur : token manquant dans la réponse');
+          _showError('Erreur : token manquant dans la réponse : $data');
           return;
         }
         await SessionManager.saveUserToken(data['token']);
@@ -63,8 +64,8 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           children: [
             TextField(
-              controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              controller: phoneController,
+              decoration: InputDecoration(labelText: 'Phone'),
             ),
             TextField(
               controller: passwordController,

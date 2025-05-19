@@ -11,24 +11,24 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final firstnameController = TextEditingController();
   final lastnameController = TextEditingController();
-  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
   final passwordController = TextEditingController();
 
   Future<void> register() async {
-    final url = Uri.parse('${ApiConfig.baseUrl}/auth/register');
+    final url = Uri.parse('${ApiConfig.baseUrl}/users');
     try {
       final response = await http.post(url, body: {
-        'firstname': firstnameController.text,
-        'lastname': lastnameController.text,
-        'email': emailController.text,
+        'firstName': firstnameController.text,
+        'lastName': lastnameController.text,
+        'phoneNumber': phoneController.text,
         'password': passwordController.text,
       });
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         Navigator.pushReplacementNamed(context, '/login');
       } else {
         final error = _extractErrorMessage(response.body);
-        _showError('Erreur d\'inscription : $error');
+        _showError('Erreur d\'inscription : $error ');
       }
     } catch (e) {
       _showError('Erreur réseau : $e');
@@ -61,7 +61,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           children: [
             TextField(controller: firstnameController, decoration: InputDecoration(labelText: 'Prénom')),
             TextField(controller: lastnameController, decoration: InputDecoration(labelText: 'Nom')),
-            TextField(controller: emailController, decoration: InputDecoration(labelText: 'Email')),
+            TextField(controller: phoneController, decoration: InputDecoration(labelText: 'Phone')),
             TextField(controller: passwordController, decoration: InputDecoration(labelText: 'Mot de passe'), obscureText: true),
             ElevatedButton(onPressed: register, child: Text('S\'inscrire')),
           ],

@@ -47,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-         if (widget.token.isEmpty) {
+         if (widget.token == 'test') {
       return Scaffold(
         body: Center(child: Text("Token invalide")),
       );

@@ -36,7 +36,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.token.isEmpty) {
+    if (widget.token == 'test') {
       return Scaffold(
         body: Center(child: Text("Token invalide")),
       );

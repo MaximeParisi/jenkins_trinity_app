@@ -10,7 +10,11 @@ class SessionManager {
 
   static Future<String> getUserToken() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_userTokenKey) ?? '';
+    if(prefs.getString(_userTokenKey) == null ){
+      return 'test';
+    }else{
+      return prefs.getString(_userTokenKey) ?? 'test';
+      };
   }
 
   static Future<void> clearUserToken() async {

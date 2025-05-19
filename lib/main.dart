@@ -13,52 +13,37 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  Future<String?> _getToken() async {
-    return await SessionManager.getUserToken();
+  Future<String> _getToken() async {
+    final token = await SessionManager.getUserToken();
+    return token;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String?>(
+    return FutureBuilder<String>(
       future: _getToken(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
+        if (!snapshot.hasData) {
           return const MaterialApp(
             home: Scaffold(body: Center(child: CircularProgressIndicator())),
           );
         }
 
-        final token = snapshot.data;
+        final token = snapshot.data!;
+        final isLoggedIn = token != 'test';
 
-        if (token == null) {
-          // Si le token est null, on redirige vers la page de login
-          return MaterialApp(
-            initialRoute: '/login',
-            routes: {
-              '/login': (context) => LoginScreen(),
-              '/register': (context) => RegisterScreen(),
-            },
-            theme: ThemeData(
-              primarySwatch: Colors.blue,
-            ),
-          );
-        }
-
-        // Si le token est non-nul, on affiche les autres écrans
         return MaterialApp(
-          initialRoute: '/products',
+          home: isLoggedIn
+              ? ProductListScreen(token: token)
+              : LoginScreen(), // ← pas de route initiale, juste `home:`
           routes: {
-            '/login': (context) => LoginScreen(),
             '/register': (context) => RegisterScreen(),
-            '/home': (context) => ProductListScreen(token: token),
             '/products': (context) => ProductListScreen(token: token),
             '/cart': (context) => CartScreen(token: token),
             '/profile': (context) => ProfileScreen(token: token),
             '/profile/update': (context) => UpdateProfileScreen(token: token),
           },
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-          ),
+          theme: ThemeData(primarySwatch: Colors.blue),
         );
       },
     );

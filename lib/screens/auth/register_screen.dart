@@ -16,20 +16,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> register() async {
     final url = Uri.parse('${ApiConfig.baseUrl}/auth/register');
-    final response = await http.post(url, body: {
-      'firstname': firstnameController.text,
-      'lastname': lastnameController.text,
-      'email': emailController.text,
-      'password': passwordController.text,
-    });
+    try {
+      final response = await http.post(url, body: {
+        'firstname': firstnameController.text,
+        'lastname': lastnameController.text,
+        'email': emailController.text,
+        'password': passwordController.text,
+      });
 
-    if (response.statusCode == 201) {
-      Navigator.pushReplacementNamed(context, '/login');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de l\'inscription')),
-      );
+      if (response.statusCode == 201) {
+        Navigator.pushReplacementNamed(context, '/login');
+      } else {
+        final error = _extractErrorMessage(response.body);
+        _showError('Erreur d\'inscription : $error');
+      }
+    } catch (e) {
+      _showError('Erreur réseau : $e');
     }
+  }
+
+  String _extractErrorMessage(String body) {
+    try {
+      final decoded = json.decode(body);
+      if (decoded is Map && decoded.containsKey('message')) {
+        return decoded['message'];
+      }
+    } catch (_) {}
+    return 'Réponse invalide du serveur';
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override

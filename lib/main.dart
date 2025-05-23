@@ -33,10 +33,9 @@ class MyApp extends StatelessWidget {
         final isLoggedIn = token != 'test';
 
         return MaterialApp(
-          home: isLoggedIn
-              ? ProductListScreen(token: token)
-              : LoginScreen(), // ← pas de route initiale, juste `home:`
+          home: isLoggedIn ? HomeScreen(token: token) : LoginScreen(),
           routes: {
+            '/login': (context) => LoginScreen(),
             '/register': (context) => RegisterScreen(),
             '/products': (context) => ProductListScreen(token: token),
             '/home': (context) => HomeScreen(token: token),

@@ -29,7 +29,10 @@ class _LoginScreenState extends State<LoginScreen> {
           return;
         }
         await SessionManager.saveUserToken(data['token']);
-        Navigator.pushReplacementNamed(context, '/products');
+        final stored = await SessionManager.getUserToken();
+        print('✅ Token sauvegardé et relu : $stored');
+
+        Navigator.pushReplacementNamed(context, '/home');
       } else {
         final error = _extractErrorMessage(response.body);
         _showError('Erreur de connexion : $error');
@@ -55,31 +58,87 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Connexion')),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: phoneController,
-              decoration: InputDecoration(labelText: 'Phone'),
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(title: Text('Connexion')),
+    body: Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Container(
+            margin: EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Color(0xFF66509C), width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 2,
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
             ),
-            TextField(
+            child: TextField(
+              controller: phoneController,
+              decoration: InputDecoration(
+                labelText: 'Phone',
+                labelStyle: TextStyle(color: Color(0xFF66509C)),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 18),
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(bottom: 32),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Color(0xFF66509C), width: 2), 
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 2,
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: TextField(
               controller: passwordController,
-              decoration: InputDecoration(labelText: 'Mot de passe'),
+              decoration: InputDecoration(
+                labelText: 'Mot de passe',
+                labelStyle: TextStyle(color: Color(0xFF66509C)), // Violet correct
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 18),
+              ),
               obscureText: true,
             ),
-            ElevatedButton(onPressed: login, child: Text('Se connecter')),
-            TextButton(
-              onPressed: () => Navigator.pushNamed(context, '/register'),
-              child: Text('Créer un compte'),
+          ),
+          ElevatedButton(
+            onPressed: login,
+            style: ElevatedButton.styleFrom(
+              primary: Color(0xFF66509C), // Violet correct
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 16),
             ),
-          ],
-        ),
+            child: Text(
+              'Se connecter',
+              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pushNamed(context, '/register'),
+            child: Text(
+              'Créer un compte',
+              style: TextStyle(color: Color(0xFF66509C)), // Violet correct
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+} 
 }

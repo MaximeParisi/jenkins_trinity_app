@@ -51,22 +51,129 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Créer un compte')),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(controller: firstnameController, decoration: InputDecoration(labelText: 'Prénom')),
-            TextField(controller: lastnameController, decoration: InputDecoration(labelText: 'Nom')),
-            TextField(controller: phoneController, decoration: InputDecoration(labelText: 'Phone')),
-            TextField(controller: passwordController, decoration: InputDecoration(labelText: 'Mot de passe'), obscureText: true),
-            ElevatedButton(onPressed: register, child: Text('S\'inscrire')),
-          ],
-        ),
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(title: Text('Créer un compte')),
+    body: Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Container(
+            margin: EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Color(0xFF66509C), width: 2), // Violet correct
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 2,
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: firstnameController,
+              decoration: InputDecoration(
+                labelText: 'Prénom',
+                labelStyle: TextStyle(color: Color(0xFF66509C)),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 18),
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Color(0xFF66509C), width: 2), // Violet correct
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 2,
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: lastnameController,
+              decoration: InputDecoration(
+                labelText: 'Nom',
+                labelStyle: TextStyle(color: Color(0xFF66509C)),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 18),
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Color(0xFF66509C), width: 2), // Violet correct
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 2,
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: phoneController,
+              decoration: InputDecoration(
+                labelText: 'Phone',
+                labelStyle: TextStyle(color: Color(0xFF66509C)),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 18),
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(bottom: 32),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Color(0xFF66509C), width: 2), // Violet correct
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 2,
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: passwordController,
+              decoration: InputDecoration(
+                labelText: 'Mot de passe',
+                labelStyle: TextStyle(color: Color(0xFF66509C)),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 18),
+              ),
+              obscureText: true,
+            ),
+          ),
+          ElevatedButton(
+            onPressed: register,
+            style: ElevatedButton.styleFrom(
+              primary: Color(0xFF66509C), // Violet correct
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: Text(
+              'S\'inscrire',
+              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
       ),
-    );
-  }
-}
+    ),
+  );
+} 
+} 
+

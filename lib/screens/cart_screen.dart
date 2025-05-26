@@ -46,9 +46,7 @@ class _CartScreenState extends State<CartScreen> {
       setState(() {
         cartItems = json.decode(response.body) ?? [];
       });
-      print('testo1 : $cartItems');
     } else {
-      // Handle error if needed, for example, show a message or handle empty cart
       setState(() {
         cartItems = [];
       });
@@ -67,9 +65,6 @@ class _CartScreenState extends State<CartScreen> {
     } else {
       final msg = _extractErrorMessage(response.body);
       _showError('Erreur suppression produit : $msg');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de la suppression du produit')),
-      );
     }
   }
 
@@ -83,9 +78,24 @@ class _CartScreenState extends State<CartScreen> {
       setState(() {
         cartItems = [];
       });
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Paiement effectué')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Paiement effectué')),
+      );
     }
+  }
+
+  double getTotalPrice() {
+    double total = 0.0;
+    for (var item in cartItems) {
+      if (item['products'] != null) {
+        for (var product in item['products']) {
+          if (product['price'] != null) {
+            total += double.tryParse(product['price'].toString()) ?? 0.0;
+          }
+        }
+      }
+    }
+    return total;
   }
 
   @override
@@ -108,7 +118,7 @@ class _CartScreenState extends State<CartScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Mon Panier', style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF66509C), // Violet spécifique
+        backgroundColor: Color(0xFF66509C),
       ),
       body: Column(
         children: [
@@ -122,102 +132,109 @@ class _CartScreenState extends State<CartScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: item['products'].map<Widget>((product) {
                       return Container(
-                          margin:
-                              EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            border:
-                                Border.all(color: Color(0xFF66509C), width: 2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                spreadRadius: 2,
-                                blurRadius: 6,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Card(
-                            margin: EdgeInsets.symmetric(
-                                vertical: 8, horizontal: 16),
-                            child: Padding(
-                              padding: EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ListTile(
-                                    contentPadding: EdgeInsets.zero,
-                                    leading: Image.network(
-                                      product['picture'],
-                                      width: 50,
-                                      height: 50,
-                                      fit: BoxFit.cover,
-                                    ),
-                                    title: Text(
-                                      '${product['name']}',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    subtitle: Text(
-                                        '${product['price']} € | ${product['brand']}'),
-                                    trailing: IconButton(
-                                      icon: Icon(Icons.delete,
-                                          color: Colors.redAccent),
-                                      onPressed: () => removeFromCart(
-                                          product['_id'], item['_id']),
-                                    ),
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    'Catégorie : ${product['category']}',
-                                    style:
-                                        TextStyle(fontStyle: FontStyle.italic),
-                                  ),
-                                  SizedBox(height: 6),
-                                  Text(
-                                    'Infos nutritionnelles :',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                      '• Calories : ${product['nutritionalInformation']['calories']} kcal'),
-                                  Text(
-                                      '• Protéines : ${product['nutritionalInformation']['proteins']}'),
-                                  Text(
-                                      '• Glucides : ${product['nutritionalInformation']['carbs']}'),
-                                  Text(
-                                      '• Lipides : ${product['nutritionalInformation']['fats']}'),
-                                ],
-                              ),
+                        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Color(0xFF66509C), width: 2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              spreadRadius: 2,
+                              blurRadius: 6,
+                              offset: Offset(0, 3),
                             ),
-                          ));
+                          ],
+                        ),
+                        child: Card(
+                          margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          child: Padding(
+                            padding: EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: Image.network(
+                                    product['picture'],
+                                    width: 50,
+                                    height: 50,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  title: Text(
+                                    '${product['name']}',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(
+                                      '${product['price']} € | ${product['brand']}'),
+                                  trailing: IconButton(
+                                    icon: Icon(Icons.delete, color: Colors.redAccent),
+                                    onPressed: () => removeFromCart(
+                                        product['_id'], item['_id']),
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Catégorie : ${product['category']}',
+                                  style: TextStyle(fontStyle: FontStyle.italic),
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  'Infos nutritionnelles :',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                    '• Calories : ${product['nutritionalInformation']['calories']} kcal'),
+                                Text(
+                                    '• Protéines : ${product['nutritionalInformation']['proteins']}'),
+                                Text(
+                                    '• Glucides : ${product['nutritionalInformation']['carbs']}'),
+                                Text(
+                                    '• Lipides : ${product['nutritionalInformation']['fats']}'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
                     }).toList(),
                   );
                 }
-
                 return SizedBox.shrink();
               },
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: pay,
-              style: ElevatedButton.styleFrom(
-                primary: Color(0xFF66509C), // Violet spécifique
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            child: Column(
+              children: [
+                Text(
+                  'Total : ${getTotalPrice().toStringAsFixed(2)} €',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 ),
-                padding: EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: Text(
-                'Payer',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold),
-              ),
+                SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: pay,
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFF66509C),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: Text(
+                    'Payer',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

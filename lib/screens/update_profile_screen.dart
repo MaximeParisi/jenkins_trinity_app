@@ -17,22 +17,52 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   final lastnameController = TextEditingController();
   final phoneController = TextEditingController();
 
-  Future<void> updateProfile() async {
-    final url = Uri.parse('${ApiConfig.baseUrl}/users');
-    final response = await http.put(url, headers: {
-      'Authorization': 'Bearer ${widget.token}'
-    }, body: {
-      'firstname': firstnameController.text,
-      'lastname': lastnameController.text,
-      'phone': phoneController.text,
-    });
+  String _extractErrorMessage(String body) {
+    try {
+      final decoded = json.decode(body);
+      if (decoded is Map && decoded.containsKey('message')) {
+        return decoded['message'];
+      }
+    } catch (_) {}
+    return 'Réponse invalide du serveur';
+  }
 
-    if (response.statusCode == 200) {
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Échec de la mise à jour')),
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  Future<void> updateProfile() async {
+    try {
+      final url = Uri.parse('${ApiConfig.baseUrl}/users');
+
+      // Construire dynamiquement le body
+      final Map<String, String> body = {};
+      if (firstnameController.text.trim().isNotEmpty) {
+        body['firstName'] = firstnameController.text.trim();
+      }
+      if (lastnameController.text.trim().isNotEmpty) {
+        body['lastName'] = lastnameController.text.trim();
+      }
+      if (phoneController.text.trim().isNotEmpty) {
+        body['phoneNumber'] = phoneController.text.trim();
+      }
+
+      final response = await http.put(
+        url,
+        headers: {'Authorization': 'Bearer ${widget.token}'},
+        body: body,
       );
+
+      if (response.statusCode == 200) {
+        Navigator.pop(context);
+      } else {
+        final msg = _extractErrorMessage(response.body);
+        _showError('Erreur mise à jour profil : $msg');
+      }
+    } catch (e) {
+      _showError('Erreur réseau : $e');
     }
   }
 
@@ -57,7 +87,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       appBar: AppBar(
         title:
             Text('Modifier le profil', style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF66509C), // Violet spécifique
+        backgroundColor: Color(0xFF66509C),
       ),
       body: Padding(
         padding: EdgeInsets.all(16),
@@ -78,9 +108,9 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                 ],
               ),
               child: TextField(
-                controller: firstnameController,
+                controller: lastnameController,
                 decoration: InputDecoration(
-                  labelText: 'Prénom',
+                  labelText: 'Nom',
                   labelStyle: TextStyle(color: Color(0xFF66509C)),
                   border: InputBorder.none,
                   contentPadding:
@@ -103,9 +133,9 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                 ],
               ),
               child: TextField(
-                controller: lastnameController,
+                controller: firstnameController,
                 decoration: InputDecoration(
-                  labelText: 'Nom',
+                  labelText: 'Prénom',
                   labelStyle: TextStyle(color: Color(0xFF66509C)),
                   border: InputBorder.none,
                   contentPadding:
@@ -141,7 +171,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
             ElevatedButton(
               onPressed: updateProfile,
               style: ElevatedButton.styleFrom(
-                primary: Color(0xFF66509C), // Violet spécifique
+                primary: Color(0xFF66509C),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

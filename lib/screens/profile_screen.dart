@@ -108,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Mon profil', style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF66509C), // Violet spécifique
+        backgroundColor: Color(0xFF66509C),
       ),
       body: Padding(
         padding: EdgeInsets.all(16),
@@ -137,9 +137,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.pushNamed(context, '/profile/update'),
+              onPressed: () async {
+                await Navigator.pushNamed(context, '/profile/update');
+                fetchProfile();
+              },
               style: ElevatedButton.styleFrom(
-                primary: Color(0xFF66509C), // Violet spécifique
+                primary: Color(0xFF66509C),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

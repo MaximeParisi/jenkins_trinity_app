@@ -68,13 +68,13 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
           if (createCartResponse.statusCode == 201) {
             final newCart = json.decode(createCartResponse.body);
-            cartId = newCart[0]['_id'];
+            print(newCart);
+            cartId = newCart['_id'];
           } else {
             _showError("❌ Erreur création panier.");
             return;
           }
         } else {
-          print('test : $cart');
           cartId = cart[0]['_id'];
         }
       } else {
@@ -154,7 +154,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Produits', style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF66509C), // Violet spécifique
+        backgroundColor: Color(0xFF66509C),
       ),
       body: ListView.builder(
         itemCount: products.length,
@@ -183,7 +183,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
               trailing: ElevatedButton(
                 onPressed: () => addToCart(product['_id']),
                 style: ElevatedButton.styleFrom(
-                  primary: Color(0xFF66509C), // Violet spécifique
+                  primary: Color(0xFF66509C),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

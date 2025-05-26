@@ -4,6 +4,8 @@ import 'dart:convert';
 import '../config/api.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class CartScreen extends StatefulWidget {
   final String token;
@@ -158,17 +160,18 @@ class _CartScreenState extends State<CartScreen> {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final orderId = data['orderID'];
-      final approvalUrl =
-          'https://www.sandbox.paypal.com/checkoutnow?token=$orderId';
+      final Uri approvalUrl = Uri.parse(
+        'https://www.sandbox.paypal.com/checkoutnow?token=$orderId',
+      );
 
-      if (await canLaunch(approvalUrl)) {
-        await launch(approvalUrl);
+      final bool launched = await launchUrl(
+        approvalUrl,
+        mode: LaunchMode.externalApplication,
+      );
 
-        // Simuler confirmation après redirection
+      if (launched) {
         await Future.delayed(Duration(seconds: 2));
-
         await showPaymentNotification();
-
         await createInvoice(orderId, double.parse(total));
         _showError('Paiement et facture complétés');
       } else {

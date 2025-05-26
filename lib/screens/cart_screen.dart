@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../config/api.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class CartScreen extends StatefulWidget {
   final String token;
@@ -15,10 +16,24 @@ class CartScreen extends StatefulWidget {
 class _CartScreenState extends State<CartScreen> {
   List cartItems = [];
 
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
   @override
   void initState() {
     super.initState();
+    _initializeNotifications();
     fetchCart();
+  }
+
+  void _initializeNotifications() async {
+    const AndroidInitializationSettings androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const InitializationSettings initSettings =
+        InitializationSettings(android: androidSettings);
+
+    await flutterLocalNotificationsPlugin.initialize(initSettings);
   }
 
   String _extractErrorMessage(String body) {
@@ -34,6 +49,27 @@ class _CartScreenState extends State<CartScreen> {
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
+    );
+  }
+
+  Future<void> showPaymentNotification() async {
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+      'payment_channel',
+      'Paiement',
+      channelDescription: 'Notifications de paiement',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    const NotificationDetails platformDetails =
+        NotificationDetails(android: androidDetails);
+
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'Paiement réussi',
+      'Votre facture a été générée avec succès.',
+      platformDetails,
     );
   }
 
@@ -69,6 +105,26 @@ class _CartScreenState extends State<CartScreen> {
     }
   }
 
+  Future<void> createInvoice(String orderId, double total) async {
+    final invoiceResponse = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/invoices'),
+      headers: {
+        'Authorization': 'Bearer ${widget.token}',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'orderID': orderId,
+        'products': cartItems.expand((item) => item['products']).toList(),
+        'total': total,
+        'paymentStatus': 'completed'
+      }),
+    );
+
+    if (invoiceResponse.statusCode != 201) {
+      _showError("Erreur lors de la création de la facture");
+    }
+  }
+
   Future<void> pay() async {
     final total = getTotalPrice().toStringAsFixed(2);
 
@@ -86,8 +142,6 @@ class _CartScreenState extends State<CartScreen> {
       }
     }
 
-    print('test');
-
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/paypal/create-order'),
       headers: {
@@ -100,21 +154,28 @@ class _CartScreenState extends State<CartScreen> {
         'id': 'temporary_id',
       }),
     );
-    print('Réponse brute du serveur: ${response.body}');
 
     if (response.statusCode == 200) {
-      print('Réponse brute du serveur: ${response.body}');
       final data = json.decode(response.body);
       final orderId = data['orderID'];
-      final approvalUrl = 'https://www.sandbox.paypal.com/checkoutnow?token=$orderId';
+      final approvalUrl =
+          'https://www.sandbox.paypal.com/checkoutnow?token=$orderId';
 
       if (await canLaunch(approvalUrl)) {
         await launch(approvalUrl);
+
+        // Simuler confirmation après redirection
+        await Future.delayed(Duration(seconds: 2));
+
+        await showPaymentNotification();
+
+        await createInvoice(orderId, double.parse(total));
+        _showError('Paiement et facture complétés');
       } else {
         _showError('Impossible d’ouvrir PayPal');
       }
     } else {
-       final msg = _extractErrorMessage(response.body);
+      final msg = _extractErrorMessage(response.body);
       _showError('Erreur paypal : $msg');
     }
   }
@@ -167,10 +228,12 @@ class _CartScreenState extends State<CartScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: item['products'].map<Widget>((product) {
                       return Container(
-                        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        margin:
+                            EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Color(0xFF66509C), width: 2),
+                          border:
+                              Border.all(color: Color(0xFF66509C), width: 2),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.1),
@@ -181,7 +244,8 @@ class _CartScreenState extends State<CartScreen> {
                           ],
                         ),
                         child: Card(
-                          margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          margin:
+                              EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                           child: Padding(
                             padding: EdgeInsets.all(12),
                             child: Column(
@@ -197,26 +261,26 @@ class _CartScreenState extends State<CartScreen> {
                                   ),
                                   title: Text(
                                     '${product['name']}',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                   subtitle: Text(
                                       '${product['price']} € | ${product['brand']}'),
                                   trailing: IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.redAccent),
+                                    icon: Icon(Icons.delete,
+                                        color: Colors.redAccent),
                                     onPressed: () => removeFromCart(
                                         product['_id'], item['_id']),
                                   ),
                                 ),
                                 SizedBox(height: 8),
-                                Text(
-                                  'Catégorie : ${product['category']}',
-                                  style: TextStyle(fontStyle: FontStyle.italic),
-                                ),
+                                Text('Catégorie : ${product['category']}',
+                                    style:
+                                        TextStyle(fontStyle: FontStyle.italic)),
                                 SizedBox(height: 6),
-                                Text(
-                                  'Infos nutritionnelles :',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
+                                Text('Infos nutritionnelles :',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
                                 SizedBox(height: 4),
                                 Text(
                                     '• Calories : ${product['nutritionalInformation']['calories']} kcal'),

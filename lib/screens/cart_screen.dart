@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../config/api.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CartScreen extends StatefulWidget {
   final String token;
@@ -69,18 +70,52 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Future<void> pay() async {
+    final total = getTotalPrice().toStringAsFixed(2);
+
+    final List<Map<String, dynamic>> items = [];
+
+    for (var item in cartItems) {
+      if (item['products'] != null) {
+        for (var product in item['products']) {
+          items.add({
+            'name': product['name'],
+            'price': product['price'].toString(),
+            'quantity': 1,
+          });
+        }
+      }
+    }
+
+    print('test');
+
     final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}/payment'),
-      headers: {'Authorization': 'Bearer ${widget.token}'},
+      Uri.parse('${ApiConfig.baseUrl}/paypal/create-order'),
+      headers: {
+        'Authorization': 'Bearer ${widget.token}',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'total': total,
+        'cartItems': items,
+        'id': 'temporary_id',
+      }),
     );
+    print('Réponse brute du serveur: ${response.body}');
 
     if (response.statusCode == 200) {
-      setState(() {
-        cartItems = [];
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Paiement effectué')),
-      );
+      print('Réponse brute du serveur: ${response.body}');
+      final data = json.decode(response.body);
+      final orderId = data['orderID'];
+      final approvalUrl = 'https://www.sandbox.paypal.com/checkoutnow?token=$orderId';
+
+      if (await canLaunch(approvalUrl)) {
+        await launch(approvalUrl);
+      } else {
+        _showError('Impossible d’ouvrir PayPal');
+      }
+    } else {
+       final msg = _extractErrorMessage(response.body);
+      _showError('Erreur paypal : $msg');
     }
   }
 

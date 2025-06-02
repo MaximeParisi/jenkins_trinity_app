@@ -36,6 +36,8 @@ dependencies:
   mobile_scanner: 3.3.0  
   url_launcher: ^6.2.5
   flutter_local_notifications: ^17.0.0
+  mockito: ^5.4.2
+  build_runner: ^2.4.6
 
 
   # The following adds the Cupertino Icons font to your application.

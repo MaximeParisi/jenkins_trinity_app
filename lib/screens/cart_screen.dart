@@ -4,8 +4,8 @@ import 'dart:convert';
 import '../config/api.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'dart:math';
 
 class CartScreen extends StatefulWidget {
   final String token;
@@ -75,6 +75,28 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
+  Future<void> showInvoiceCreatedNotification() async {
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+      'invoice_channel',
+      'Facture',
+      channelDescription: 'Notifications de création de facture',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+
+    const NotificationDetails platformDetails = NotificationDetails(
+      android: androidDetails,
+    );
+
+    await flutterLocalNotificationsPlugin.show(
+      1,
+      'Facture créée',
+      'Votre facture a été enregistrée. Veuillez procéder au paiement.',
+      platformDetails,
+    );
+  }
+
   Future<void> fetchCart() async {
     final response = await http.get(
       Uri.parse('${ApiConfig.baseUrl}/cart'),
@@ -107,7 +129,7 @@ class _CartScreenState extends State<CartScreen> {
     }
   }
 
-  Future<void> createInvoice(String orderId, double total) async {
+  Future<String?> createInvoice(String orderId, double total) async {
     final invoiceResponse = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/invoices'),
       headers: {
@@ -118,12 +140,37 @@ class _CartScreenState extends State<CartScreen> {
         'orderID': orderId,
         'products': cartItems.expand((item) => item['products']).toList(),
         'total': total,
-        'paymentStatus': 'completed'
+        'paymentStatus': 'not completed'
       }),
     );
 
-    if (invoiceResponse.statusCode != 201) {
+    if (invoiceResponse.statusCode == 201) {
+      final invoice = json.decode(invoiceResponse.body);
+      await showInvoiceCreatedNotification();
+      return invoice['_id'];
+    } else {
       _showError("Erreur lors de la création de la facture");
+      return null;
+    }
+  }
+
+  Future<void> capturePayment(String orderId) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/paypal/capture-payment'),
+      headers: {
+        'Authorization': 'Bearer ${widget.token}',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({'orderId': orderId}),
+    );
+
+    if (response.statusCode == 200) {
+      await showPaymentNotification();
+      await clearCart();
+      _showError('Paiement validé et facture mise à jour');
+    } else {
+      final msg = _extractErrorMessage(response.body);
+      _showError('Erreur lors de la validation du paiement : $msg');
     }
   }
 
@@ -143,6 +190,12 @@ class _CartScreenState extends State<CartScreen> {
         }
       }
     }
+
+    final randomOrderId = Random().nextInt(999999) + 1;
+    final invoiceId =
+        await createInvoice(randomOrderId.toString(), double.parse(total));
+
+    if (invoiceId == null) return;
 
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/paypal/create-order'),
@@ -171,15 +224,13 @@ class _CartScreenState extends State<CartScreen> {
 
       if (launched) {
         await Future.delayed(Duration(seconds: 2));
-        await showPaymentNotification();
-        await createInvoice(orderId, double.parse(total));
-        _showError('Paiement et facture complétés');
+        await capturePayment(orderId);
       } else {
         _showError('Impossible d’ouvrir PayPal');
       }
     } else {
       final msg = _extractErrorMessage(response.body);
-      _showError('Erreur paypal : $msg');
+      _showError('Erreur PayPal : $msg');
     }
   }
 
@@ -195,6 +246,23 @@ class _CartScreenState extends State<CartScreen> {
       }
     }
     return total;
+  }
+
+  Future<void> clearCart() async {
+    for (var item in cartItems) {
+      final cartId = item['_id'];
+      final response = await http.delete(
+        Uri.parse('${ApiConfig.baseUrl}/cart/$cartId'),
+        headers: {'Authorization': 'Bearer ${widget.token}'},
+      );
+
+      if (response.statusCode != 200) {
+        final msg = _extractErrorMessage(response.body);
+        _showError('Erreur suppression du panier : $msg');
+      }
+    }
+
+    fetchCart();
   }
 
   @override

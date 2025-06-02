@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'product_list_screen.dart';
 import 'cart_screen.dart';
 import 'profile_screen.dart';
-import 'scan_product_screen.dart'; 
+import 'scan_product_screen.dart';
+import 'invoice_screen.dart'; 
 import '../utils/session_manager.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -27,7 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _screens = [
       ProductListScreen(token: widget.token),
       CartScreen(token: widget.token),
-      ScanProductScreen(token: widget.token), 
+      ScanProductScreen(token: widget.token),
+      InvoiceScreen(token: widget.token),
       ProfileScreen(token: widget.token),
     ];
     cartItemCount = getCartItemCount();
@@ -126,6 +128,10 @@ class _HomeScreenState extends State<HomeScreen> {
               const BottomNavigationBarItem(
                 icon: Icon(Icons.qr_code_scanner),
                 label: 'Scanner',
+              ),
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.receipt_long), // ✅ Paiements
+                label: 'Paiements',
               ),
               const BottomNavigationBarItem(
                 icon: Icon(Icons.person),

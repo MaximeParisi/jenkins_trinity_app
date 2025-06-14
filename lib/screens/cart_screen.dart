@@ -76,6 +76,7 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Future<void> showInvoiceCreatedNotification() async {
+    print("test1");
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
       'invoice_channel',
@@ -84,10 +85,13 @@ class _CartScreenState extends State<CartScreen> {
       importance: Importance.high,
       priority: Priority.high,
     );
+      print("test2");
 
     const NotificationDetails platformDetails = NotificationDetails(
       android: androidDetails,
     );
+
+    print("test3");
 
     await flutterLocalNotificationsPlugin.show(
       1,
@@ -95,6 +99,7 @@ class _CartScreenState extends State<CartScreen> {
       'Votre facture a été enregistrée. Veuillez procéder au paiement.',
       platformDetails,
     );
+        print("test4");
   }
 
   Future<void> fetchCart() async {
@@ -147,6 +152,8 @@ class _CartScreenState extends State<CartScreen> {
     if (invoiceResponse.statusCode == 201) {
       final invoice = json.decode(invoiceResponse.body);
       await showInvoiceCreatedNotification();
+      await clearCart();
+
       return invoice['_id'];
     } else {
       _showError("Erreur lors de la création de la facture");
@@ -166,7 +173,6 @@ class _CartScreenState extends State<CartScreen> {
 
     if (response.statusCode == 200) {
       await showPaymentNotification();
-      await clearCart();
       _showError('Paiement validé et facture mise à jour');
     } else {
       final msg = _extractErrorMessage(response.body);

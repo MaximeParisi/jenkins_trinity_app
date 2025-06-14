@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../config/api.dart';
+import '../../utils/session_manager.dart';
 
 class ProductListScreen extends StatefulWidget {
   final String token;
@@ -23,6 +24,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   Future<void> fetchProducts() async {
     print('🔐 Token envoyé : ${widget.token}');
+
     final response = await http.get(
       Uri.parse(ApiConfig.baseUrl + ApiConfig.productListEndpoint),
       headers: {
@@ -38,6 +40,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     } else {
       final error = _extractErrorMessage(response.body);
       _showError('Erreur de connexion : $error');
+
     }
   }
 

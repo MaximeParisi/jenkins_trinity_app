@@ -130,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 label: 'Scanner',
               ),
               const BottomNavigationBarItem(
-                icon: Icon(Icons.receipt_long), // ✅ Paiements
+                icon: Icon(Icons.receipt_long), 
                 label: 'Paiements',
               ),
               const BottomNavigationBarItem(
